@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>shibu-meshi - 気分でみつける、あなたのお店</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">🍽 shibu-meshi</h1>
+            <p class="subtitle">今の気分で、ぴったりのお店を見つけよう</p>
+        </header>
+
+        <main class="main">
+            <!-- 入力セクション -->
+            <section class="input-section">
+                <div class="input-card">
+                    <h2>今、どんな気分ですか？</h2>
+                    <form id="mood-form" class="mood-form">
+                        <div class="input-group">
+                            <label for="mood-text">自由に書いてください</label>
+                            <textarea 
+                                id="mood-text" 
+                                name="mood-text" 
+                                placeholder="例：朝は軽め、今は温かいものがほしい&#10;例：がっつりとした中華が食べたい&#10;例：お祝い用の特別なお店を探している"
+                                rows="4"
+                                required
+                            ></textarea>
+                        </div>
+                        
+                        <div class="quick-options">
+                            <p>クイック選択:</p>
+                            <div class="option-buttons">
+                                <button type="button" class="option-btn" data-text="温かいものが食べたい">🔥 温かいもの</button>
+                                <button type="button" class="option-btn" data-text="さっぱりした軽めのランチ">🌱 軽めランチ</button>
+                                <button type="button" class="option-btn" data-text="がっつりボリューム満点の夕食">🍖 がっつり</button>
+                                <button type="button" class="option-btn" data-text="おしゃれなカフェでリラックスしたい">☕ カフェ</button>
+                                <button type="button" class="option-btn" data-text="お祝い用の特別なお店">🎉 お祝い</button>
+                                <button type="button" class="option-btn" data-text="安くて美味しいコスパの良いお店">💰 コスパ重視</button>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="submit-btn">
+                            <span class="btn-icon">🔍</span>
+                            お店を探す
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 結果セクション -->
+            <section class="results-section" id="results-section" style="display: none;">
+                <div class="results-header">
+                    <h2>おすすめのお店</h2>
+                    <div class="analysis-summary" id="analysis-summary"></div>
+                </div>
+                
+                <div class="restaurants-list" id="restaurants-list">
+                    <!-- レストラン情報がここに動的に追加されます -->
+                </div>
+                
+                <button class="search-again-btn" id="search-again-btn">
+                    もう一度探す
+                </button>
+            </section>
+
+            <!-- ローディング表示 -->
+            <div class="loading" id="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>気分を分析中...</p>
+                <div class="loading-steps">
+                    <div class="step active" id="step-1">📝 気分を理解しています</div>
+                    <div class="step" id="step-2">🔍 お店を検索しています</div>
+                    <div class="step" id="step-3">💬 口コミを分析しています</div>
+                    <div class="step" id="step-4">⭐ おすすめを選んでいます</div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 shibu-meshi | AIを使わない自然文解析でお店をレコメンド</p>
+        </footer>
+    </div>
+
+    <!-- レストランカードテンプレート -->
+    <template id="restaurant-card-template">
+        <div class="restaurant-card">
+            <div class="restaurant-header">
+                <h3 class="restaurant-name"></h3>
+                <div class="restaurant-rating">
+                    <span class="stars"></span>
+                    <span class="score"></span>
+                </div>
+            </div>
+            <div class="restaurant-info">
+                <div class="genre"></div>
+                <div class="distance"></div>
+                <div class="price-range"></div>
+            </div>
+            <div class="match-reason">
+                <h4>おすすめ理由:</h4>
+                <p class="reason-text"></p>
+            </div>
+            <div class="restaurant-actions">
+                <a href="#" class="view-details-btn" target="_blank">詳細を見る</a>
+                <button class="save-btn">📌 保存</button>
+            </div>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html> 

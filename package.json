@@ -1,0 +1,25 @@
+{
+  "name": "shibu-meshi",
+  "version": "1.0.0",
+  "description": "AIを使わない自然文入力による飲食店レコメンドシステム",
+  "main": "index.js",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "npm run build:frontend",
+    "build:frontend": "echo 'Frontend build complete'",
+    "test": "jest"
+  },
+  "dependencies": {
+    "kuromoji": "^0.1.2",
+    "cheerio": "^1.0.0-rc.12",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^2.0.0",
+    "netlify-cli": "^17.0.0",
+    "jest": "^29.0.0"
+  },
+  "keywords": ["restaurant", "recommendation", "japanese", "food"],
+  "author": "",
+  "license": "MIT"
+} 
