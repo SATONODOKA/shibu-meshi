@@ -210,13 +210,20 @@ export function scoreRestaurant(restaurant: OSMRestaurant, moodAnalysis: any): n
 // メイン検索関数
 export async function searchRestaurants(params: SearchParams, moodAnalysis?: any): Promise<OSMRestaurant[]> {
   try {
+    console.log('Search params:', params);
+    
     // 料理タイプを英語/OSMタグに変換
     const cuisineTypes = params.cuisineTypes?.flatMap(type => CUISINE_MAPPING[type] || []) || [];
     const searchParams = { ...params, cuisineTypes };
+    
+    console.log('Mapped cuisine types:', cuisineTypes);
 
     // Overpass クエリ実行
     const query = buildRestaurantQuery(searchParams);
+    console.log('Overpass query:', query.substring(0, 200) + '...');
+    
     const data = await queryOverpass(query);
+    console.log('Overpass response elements count:', data.elements?.length || 0);
 
     if (!data.elements || data.elements.length === 0) {
       return [];

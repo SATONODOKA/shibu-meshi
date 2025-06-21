@@ -98,6 +98,13 @@ export default function Home() {
     setIsLoading(true)
 
     try {
+      // デバッグ用ログ
+      console.log('Searching restaurants with:', {
+        moodAnalysis: analysis,
+        location: userLocation,
+        radius: 2000
+      });
+
       const searchResponse = await fetch('/api/search-restaurants-osm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

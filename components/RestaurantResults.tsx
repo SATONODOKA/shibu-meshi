@@ -75,14 +75,14 @@ export function RestaurantResults({ restaurants, moodAnalysis, onReset }: Restau
           <div className="bg-primary-50 rounded-xl p-4 mb-6 text-left max-w-2xl mx-auto">
             <h3 className="font-semibold text-primary-800 mb-2">あなたの気分分析結果:</h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              {moodAnalysis.mood && (
-                <div><span className="text-gray-600">気分:</span> <span className="font-medium">{moodAnalysis.mood}</span></div>
+              {moodAnalysis.cuisine_types && moodAnalysis.cuisine_types.length > 0 && (
+                <div><span className="text-gray-600">料理タイプ:</span> <span className="font-medium">{moodAnalysis.cuisine_types.join(', ')}</span></div>
               )}
-              {moodAnalysis.temperature && (
-                <div><span className="text-gray-600">温度:</span> <span className="font-medium">{moodAnalysis.temperature}</span></div>
+              {moodAnalysis.dining_style && (
+                <div><span className="text-gray-600">スタイル:</span> <span className="font-medium">{moodAnalysis.dining_style}</span></div>
               )}
-              {moodAnalysis.appetite && (
-                <div><span className="text-gray-600">食欲:</span> <span className="font-medium">{moodAnalysis.appetite}</span></div>
+              {moodAnalysis.price_range && (
+                <div><span className="text-gray-600">価格帯:</span> <span className="font-medium">{moodAnalysis.price_range}</span></div>
               )}
               {moodAnalysis.atmosphere && (
                 <div><span className="text-gray-600">雰囲気:</span> <span className="font-medium">{moodAnalysis.atmosphere}</span></div>
@@ -103,9 +103,9 @@ export function RestaurantResults({ restaurants, moodAnalysis, onReset }: Restau
             <div className="flex flex-col md:flex-row gap-6">
               {/* 画像 */}
               <div className="md:w-48 md:h-32 w-full h-48 bg-gray-200 rounded-xl overflow-hidden flex-shrink-0 relative">
-                {restaurant.photoUrl ? (
+                {restaurant.photos && restaurant.photos.length > 0 ? (
                   <img
-                    src={restaurant.photoUrl}
+                    src={restaurant.photos[0]}
                     alt={restaurant.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -141,9 +141,9 @@ export function RestaurantResults({ restaurants, moodAnalysis, onReset }: Restau
                   </h3>
                   <div className="flex items-center space-x-1 flex-shrink-0">
                     <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="font-semibold text-gray-700">{restaurant.rating}</span>
-                    {restaurant.reviewCount && (
-                      <span className="text-gray-500 text-sm">({restaurant.reviewCount})</span>
+                    <span className="font-semibold text-gray-700">{restaurant.rating || 'N/A'}</span>
+                    {restaurant.user_ratings_total && (
+                      <span className="text-gray-500 text-sm">({restaurant.user_ratings_total})</span>
                     )}
                   </div>
                 </div>
@@ -156,11 +156,11 @@ export function RestaurantResults({ restaurants, moodAnalysis, onReset }: Restau
                   
                   <div className="flex items-center space-x-1">
                     <DollarSign className="w-4 h-4" />
-                    <span className="font-mono">{getPriceDisplay(restaurant.priceLevel)}</span>
+                    <span className="font-mono">{getPriceDisplay(restaurant.price_level || 0)}</span>
                   </div>
                   
                   <div className="flex flex-wrap gap-1">
-                    {restaurant.genres.slice(0, 3).map((genre, idx) => (
+                    {[restaurant.cuisine, restaurant.amenity].filter(Boolean).slice(0, 3).map((genre, idx) => (
                       <span 
                         key={idx}
                         className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs"
@@ -172,23 +172,23 @@ export function RestaurantResults({ restaurants, moodAnalysis, onReset }: Restau
                 </div>
 
                 <p className="text-gray-600 text-sm mb-3 leading-relaxed">
-                  {restaurant.address}
+                  {restaurant.formatted_address || `緯度: ${restaurant.lat}, 経度: ${restaurant.lon}`}
                 </p>
 
-                {restaurant.matchReason && (
+                {restaurant.score && (
                   <div className="bg-primary-50 rounded-lg p-3 mb-4">
                     <p className="text-primary-800 text-sm font-medium mb-1">
-                      なぜこのお店？
+                      マッチ度
                     </p>
                     <p className="text-primary-700 text-sm leading-relaxed">
-                      {restaurant.matchReason}
+                      スコア: {restaurant.score}/100
                     </p>
                   </div>
                 )}
 
-                {restaurant.atmosphere && (
+                {restaurant.tags && Object.keys(restaurant.tags).length > 0 && (
                   <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                    <span className="font-medium">雰囲気:</span> {restaurant.atmosphere}
+                    <span className="font-medium">詳細:</span> {Object.entries(restaurant.tags).slice(0, 3).map(([key, value]) => `${key}: ${value}`).join(', ')}
                   </p>
                 )}
 

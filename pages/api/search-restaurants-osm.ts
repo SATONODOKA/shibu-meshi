@@ -8,8 +8,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const { location, moodAnalysis, radius = 2000 } = req.body;
+    
+    // デバッグ用ログ
+    console.log('Search request body:', JSON.stringify(req.body, null, 2));
 
     if (!location) {
+      console.log('Location missing in request');
       return res.status(400).json({ error: '位置情報が必要です' });
     }
 
@@ -24,11 +28,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
       lat = coords.lat;
       lon = coords.lon;
-    } else if (location.lat && location.lon) {
-      // 座標が直接指定された場合
+    } else if (location.lat && (location.lon || location.lng)) {
+      // 座標が直接指定された場合（lng/lonの両方に対応）
       lat = location.lat;
-      lon = location.lon;
+      lon = location.lon || location.lng;
     } else {
+      console.log('Invalid location format:', location);
       return res.status(400).json({ error: '位置情報の形式が正しくありません' });
     }
 
@@ -56,9 +61,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error) {
     console.error('Restaurant search error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
+    const errorMessage = error instanceof Error ? error.message : 'レストラン検索に失敗しました';
+    console.error('Sending error response:', errorMessage);
+    
     res.status(500).json({ 
-      error: error instanceof Error ? error.message : 'レストラン検索に失敗しました',
-      success: false 
+      error: errorMessage,
+      success: false,
+      debug: {
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+        message: errorMessage
+      }
     });
   }
 } 

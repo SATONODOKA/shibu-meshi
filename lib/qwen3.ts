@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Ollamaローカルサーバーの設定
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-const QWEN3_MODEL = process.env.QWEN3_MODEL || 'qwen3:4b';
+const QWEN3_MODEL = process.env.QWEN3_MODEL || 'qwen3:30b';
 
 // Qwen3クライアント
 export const qwen3Client = axios.create({
@@ -17,7 +17,11 @@ export const qwen3Client = axios.create({
 // 気分分析用プロンプトテンプレート
 export const MOOD_ANALYSIS_PROMPT = `あなたは気分分析の専門家です。ユーザーの気分や要望を分析して、料理のジャンルや雰囲気を推薦してください。
 
-以下の形式で必ず回答してください：
+重要な指示：
+1. 思考プロセスは表示しないでください
+2. 説明文は一切含めないでください  
+3. 以下のJSON形式でのみ回答してください
+
 {
   "cuisine_types": ["ジャンル1", "ジャンル2", "ジャンル3"],
   "atmosphere": "求める雰囲気",
@@ -26,7 +30,9 @@ export const MOOD_ANALYSIS_PROMPT = `あなたは気分分析の専門家です�
   "additional_questions": ["追加で聞きたい質問1", "質問2"]
 }
 
-ユーザーの入力: "{user_input}"`;
+ユーザーの入力: "{user_input}"
+
+上記のJSON形式で直接回答してください。他の文章は不要です。`;
 
 // チャット用プロンプトテンプレート
 export const CHAT_PROMPT = `あなたは親しみやすい食事アドバイザーです。ユーザーとの会話を通じて、より詳細な好みを把握してください。
@@ -45,6 +51,7 @@ export async function callQwen3(messages: any[]) {
       model: QWEN3_MODEL,
       messages: messages,
       stream: false,
+      think: false, // thinkingを無効化
       options: {
         temperature: 0.7,
         top_p: 0.9,
@@ -75,11 +82,42 @@ export async function analyzeMoodWithQwen3(userInput: string) {
   const response = await callQwen3(messages);
   
   try {
+    // <think>タグを除去してJSONを抽出
+    let cleanResponse = response;
+    
+    // <think>...</think>タグを除去（マルチライン対応）
+    cleanResponse = cleanResponse.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    
+    // 前後の空白を除去
+    cleanResponse = cleanResponse.trim();
+    
+    // JSONブロックを抽出（```json ... ```がある場合）
+    const jsonMatch = cleanResponse.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      cleanResponse = jsonMatch[1].trim();
+    }
+    
+    // { で始まる最初のJSONオブジェクトを抽出
+    const jsonStart = cleanResponse.indexOf('{');
+    const jsonEnd = cleanResponse.lastIndexOf('}');
+    
+    if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+      cleanResponse = cleanResponse.substring(jsonStart, jsonEnd + 1);
+    }
+    
     // JSONレスポンスをパース
-    const analysis = JSON.parse(response);
+    const analysis = JSON.parse(cleanResponse);
+    
+    // 必要なフィールドが存在するかチェック
+    if (!analysis.cuisine_types || !Array.isArray(analysis.cuisine_types)) {
+      throw new Error('Invalid response format: missing cuisine_types');
+    }
+    
     return analysis;
   } catch (parseError) {
     console.error('JSON parse error:', parseError);
+    console.error('Raw response:', response.substring(0, 500) + '...');
+    
     // フォールバック：構造化されていない場合のデフォルト値
     return {
       cuisine_types: ['和食', '洋食', 'アジア料理'],
